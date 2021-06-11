@@ -1,0 +1,73 @@
+import React, { Component } from "react";
+import ContactsList from "./components/ContactsList";
+import initialContacts from "./contacts.json";
+import Form from "./components/Form/Form";
+import Filter from "./components/Filter/Filter";
+import shortid from "shortid";
+
+class App extends Component {
+  state = {
+    contacts: initialContacts,
+    filter: "",
+  };
+
+  addContact = ({ name, number }) => {
+    if (this.state.contacts.find((contact) => contact.name === name)) {
+      alert(`${name} already exist`);
+      return;
+    }
+    const contact = {
+      id: shortid.generate(),
+      name: name,
+      number: number,
+    };
+
+    this.setState(({ contacts }) => ({
+      contacts: [contact, ...contacts],
+    }));
+  };
+
+  deleteContact = (contactId) => {
+    this.setState((prevState) => ({
+      contacts: prevState.contacts.filter(
+        (contact) => contact.id !== contactId
+      ),
+    }));
+  };
+
+  changeFilter = (e) => {
+    this.setState({ filter: e.currentTarget.value });
+  };
+
+  getFilteredContacts = () => {
+    const { contacts, filter } = this.state;
+
+    const normalizedFilter = filter.toLowerCase();
+
+    return contacts.filter((contact) =>
+      contact.name.toLowerCase().includes(normalizedFilter)
+    );
+  };
+
+  render() {
+    const { filter } = this.state;
+
+    const filteredContacts = this.getFilteredContacts();
+
+    return (
+      <>
+        <h1>Phonebook</h1>
+        <Form onSubmit={this.addContact} />
+
+        <h2>Contacts</h2>
+        <Filter value={filter} onChange={this.changeFilter} />
+        <ContactsList
+          contacts={filteredContacts}
+          onDeleteContact={this.deleteContact}
+        />
+      </>
+    );
+  }
+}
+
+export default App;
